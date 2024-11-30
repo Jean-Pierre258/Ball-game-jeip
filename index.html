@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Ball Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff;
+            text-align: center;
+        }
+        #gameCanvas {
+            background-color: #87ceeb;
+            border: 2px solid #000;
+            display: block;
+            margin: 0 auto;
+        }
+        .score {
+            font-size: 24px;
+            margin-top: 20px;
+            color: #333;
+        }
+        .game-over {
+            font-size: 36px;
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Catch the Ball Game</h1>
+    <canvas id="gameCanvas" width="500" height="400"></canvas>
+    <div class="score">Score: <span id="score">0</span></div>
+    <div class="game-over" id="gameOver" style="display: none;">Game Over!</div>
+
+    <script>
+        // Get the canvas element and its context
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Game variables
+        let score = 0;
+        let gameOver = false;
+
+        // Paddle settings
+        const paddleWidth = 75;
+        const paddleHeight = 10;
+        let paddleX = (canvas.width - paddleWidth) / 2;
+        let paddleSpeed = 5;
+
+        // Ball settings
+        const ballRadius = 10;
+        let ballX = Math.random() * canvas.width;
+        let ballY = 0;
+        let ballSpeedY = 3;
+
+        // Key press handling
+        let rightPressed = false;
+        let leftPressed = false;
+
+        // Event listeners for paddle movement
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+
+        function keyDownHandler(e) {
+            if (e.key == "Right" || e.key == "ArrowRight") {
+                rightPressed = true;
+            }
+            else if (e.key == "Left" || e.key == "ArrowLeft") {
+                leftPressed = true;
+            }
+        }
+
+        function keyUpHandler(e) {
+            if (e.key == "Right" || e.key == "ArrowRight") {
+                rightPressed = false;
+            }
+            else if (e.key == "Left" || e.key == "ArrowLeft") {
+                leftPressed = false;
+            }
+        }
+
+        // Draw paddle
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Draw ball
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#FF0000";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Move ball
+        function moveBall() {
+            ballY += ballSpeedY;
+            if (ballY + ballRadius > canvas.height) {
+                if (ballX > paddleX && ballX < paddleX + paddleWidth) {
+                    score++;
+                    document.getElementById("score").textContent = score;
+                    resetBall();
+                } else {
+                    gameOver = true;
+                    document.getElementById("gameOver").style.display = "block";
+                }
+            }
+        }
+
+        // Move paddle
+        function movePaddle() {
+            if (rightPressed && paddleX < canvas.width - paddleWidth) {
+                paddleX += paddleSpeed;
+            } else if (leftPressed && paddleX > 0) {
+                paddleX -= paddleSpeed;
+            }
+        }
+
+        // Reset the ball to the top after catching or missing
+        function resetBall() {
+            ballX = Math.random() * canvas.width;
+            ballY = 0;
+            ballSpeedY += 0.2; // Gradually increase speed of falling balls
+        }
+
+        // Draw everything on the canvas
+        function draw() {
+            if (gameOver) return; // Stop the game when it's over
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ball and paddle
+            drawBall();
+            drawPaddle();
+
+            // Move the ball and paddle
+            moveBall();
+            movePaddle();
+
+            // Request new animation frame
+            requestAnimationFrame(draw);
+        }
+
+        // Start the game
+        draw();
+    </script>
+</body>
+</html>
